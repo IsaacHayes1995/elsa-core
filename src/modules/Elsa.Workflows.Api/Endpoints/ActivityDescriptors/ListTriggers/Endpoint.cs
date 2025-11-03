@@ -2,14 +2,14 @@ using Elsa.Abstractions;
 using Elsa.Workflows.Management;
 using JetBrains.Annotations;
 
-namespace Elsa.Workflows.Api.Endpoints.ActivityDescriptors.List;
+namespace Elsa.Workflows.Api.Endpoints.ActivityDescriptors.ListTriggers;
 
 [PublicAPI]
 internal class List(IActivityRegistry registry, IActivityRegistryPopulator registryPopulator) : ElsaEndpointWithoutRequest<Response>
 {
     public override void Configure()
     {
-        Get("/descriptors/activities");
+        Get("/descriptors/triggers");
         ConfigurePermissions("read:*", "read:activity-descriptors");
     }
 
@@ -20,7 +20,7 @@ internal class List(IActivityRegistry registry, IActivityRegistryPopulator regis
         if (forceRefresh)
             await registryPopulator.PopulateRegistryAsync(cancellationToken);
 
-        var descriptors = registry.ListAll().ToList();
+        var descriptors = registry.ListAll().Where(x => !x.Namespace.StartsWith("Elsa") && x.Kind == ActivityKind.Trigger).ToList();
         var response = new Response(descriptors);
 
         return response;
