@@ -20,7 +20,8 @@ internal class List(IActivityRegistry registry, IActivityRegistryPopulator regis
         if (forceRefresh)
             await registryPopulator.PopulateRegistryAsync(cancellationToken);
 
-        var descriptors = registry.ListAll().Where(x => !x.Namespace.StartsWith("Elsa") && x.Kind == ActivityKind.Action).ToList();
+        // var descriptors = registry.ListAll().Where(x => !x.Namespace.StartsWith("Elsa") && x.Kind == ActivityKind.Action).ToList();
+        var descriptors = registry.ListAll().ToList();
         var response = new ListTriggers.Response(descriptors);
 
         return response;
