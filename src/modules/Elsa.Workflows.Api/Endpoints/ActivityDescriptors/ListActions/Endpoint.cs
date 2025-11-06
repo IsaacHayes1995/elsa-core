@@ -9,7 +9,7 @@ internal class List(IActivityRegistry registry, IActivityRegistryPopulator regis
 {
     public override void Configure()
     {
-        Get("/descriptors/actions");
+        Get("/descriptors/actions", "/descriptors/activities");
         ConfigurePermissions("read:*", "read:activity-descriptors");
     }
 
