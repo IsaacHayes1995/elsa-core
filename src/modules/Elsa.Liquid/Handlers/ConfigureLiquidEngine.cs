@@ -45,6 +45,8 @@ internal class ConfigureLiquidEngine : INotificationHandler<RenderingLiquidTempl
         memberAccessStrategy.Register<ExpandoObject, object>((x, name) => ((IDictionary<string, object>)x!)[name]);
         memberAccessStrategy.Register<ExpressionExecutionContext, LiquidPropertyAccessor>("Variables", x => new LiquidPropertyAccessor(name => GetVariable(x, name, options)));
         memberAccessStrategy.Register<ExpressionExecutionContext, LiquidPropertyAccessor>("Input", x => new LiquidPropertyAccessor(name => GetInput(x, name, options)));
+        memberAccessStrategy.Register<ExpressionExecutionContext, LiquidPropertyAccessor>("OutputFrom", x => new LiquidPropertyAccessor(name => GetActivityOutput(x, name, options)));
+        memberAccessStrategy.Register<ActivityOutputAccessor, FluidValue>((x, name) => x.GetOutputAsync(name));
         memberAccessStrategy.Register<ExpressionExecutionContext, string?>("CorrelationId", x => x.GetWorkflowExecutionContext().CorrelationId);
         memberAccessStrategy.Register<ExpressionExecutionContext, string>("WorkflowDefinitionId", x => x.GetWorkflowExecutionContext().Workflow.Identity.DefinitionId);
         memberAccessStrategy.Register<ExpressionExecutionContext, string>("WorkflowDefinitionVersionId", x => x.GetWorkflowExecutionContext().Workflow.Identity.Id);
@@ -79,6 +81,25 @@ internal class ConfigureLiquidEngine : INotificationHandler<RenderingLiquidTempl
         var input = workflowExecutionContext.Input.TryGetValue(key, out var value) ? value : default;
         
         return Task.FromResult(input == null ? NilValue.Instance : FluidValue.Create(value, options));
+    }
+
+    private Task<FluidValue> GetActivityOutput(ExpressionExecutionContext context, string activityId, TemplateOptions options)
+    {
+        var accessor = new ActivityOutputAccessor(context, activityId, options);
+        return Task.FromResult(FluidValue.Create(accessor, options));
+    }
+
+    private Task<FluidValue> GetOutputFrom(ExpressionExecutionContext context, string activityIdOrName, TemplateOptions options)
+    {
+        // Parse the activityIdOrName to extract activity identifier and optional output name
+        // Format can be "activityId" or "activityId.outputName"
+        var parts = activityIdOrName.Split('.', 2);
+        var activityId = parts[0];
+        var outputName = parts.Length > 1 ? parts[1] : null;
+
+        var workflowExecutionContext = context.GetWorkflowExecutionContext();
+        var output = workflowExecutionContext.GetOutputByActivityId(activityId, outputName);
+        return Task.FromResult(output == null ? NilValue.Instance : FluidValue.Create(output, options));
     }
 
     private static object? GetVariableInScope(ExpressionExecutionContext context, string variableName)
