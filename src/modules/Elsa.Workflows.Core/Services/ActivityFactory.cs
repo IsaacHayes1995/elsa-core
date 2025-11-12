@@ -34,6 +34,9 @@ public class ActivityFactory : IActivityFactory
     
     private void ReadSyntheticInputs(ActivityDescriptor activityDescriptor, IActivity activity, JsonElement activityRoot, JsonSerializerOptions options)
     {
+        if (activityDescriptor == null)
+            return;
+            
         foreach (var inputDescriptor in activityDescriptor.Inputs.Where(x => x.IsSynthetic))
         {
             var inputName = inputDescriptor.Name;
