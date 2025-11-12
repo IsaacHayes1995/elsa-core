@@ -112,6 +112,7 @@ public class ActivityJsonConverter(
     private JsonSerializerOptions GetClonedOptions(JsonSerializerOptions options)
     {
         var clonedOptions = new JsonSerializerOptions(options);
+        clonedOptions.PropertyNameCaseInsensitive = true;
         clonedOptions.Converters.Add(new InputJsonConverterFactory(serviceProvider));
         clonedOptions.Converters.Add(new OutputJsonConverterFactory(serviceProvider));
         clonedOptions.Converters.Add(new ExpressionJsonConverterFactory(expressionDescriptorRegistry));
