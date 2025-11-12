@@ -45,7 +45,7 @@ internal class ConfigureLiquidEngine : INotificationHandler<RenderingLiquidTempl
         memberAccessStrategy.Register<ExpandoObject, object>((x, name) => ((IDictionary<string, object>)x!)[name]);
         memberAccessStrategy.Register<ExpressionExecutionContext, LiquidPropertyAccessor>("Variables", x => new LiquidPropertyAccessor(name => GetVariable(x, name, options)));
         memberAccessStrategy.Register<ExpressionExecutionContext, LiquidPropertyAccessor>("Input", x => new LiquidPropertyAccessor(name => GetInput(x, name, options)));
-        memberAccessStrategy.Register<ExpressionExecutionContext, LiquidPropertyAccessor>("OutputFrom", x => new LiquidPropertyAccessor(name => GetActivityOutput(x, name, options)));
+        memberAccessStrategy.Register<ExpressionExecutionContext, LiquidPropertyAccessor>("Activities", x => new LiquidPropertyAccessor(name => GetActivityOutput(x, name, options)));
         memberAccessStrategy.Register<ActivityOutputAccessor, FluidValue>((x, name) => x.GetOutputAsync(name));
         memberAccessStrategy.Register<ExpressionExecutionContext, string?>("CorrelationId", x => x.GetWorkflowExecutionContext().CorrelationId);
         memberAccessStrategy.Register<ExpressionExecutionContext, string>("WorkflowDefinitionId", x => x.GetWorkflowExecutionContext().Workflow.Identity.DefinitionId);
